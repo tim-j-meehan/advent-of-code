@@ -45,6 +45,12 @@ def doit():
     state = None
     shapes = []
     regions = []
+
+    plt.ion()  # interactive mode on
+    fig, ax = plt.subplots()
+    im = None  # we'll create this once we have a matrix to show
+
+
     for line in fp.readlines():
         print("state", state)
         if state == 'shape':
@@ -70,9 +76,25 @@ def doit():
         print(reg)
         fit = True
         mymat = reg[0]
+
+        if im is None:
+            im = ax.imshow(mymat, interpolation="nearest", origin="upper")
+            ax.set_title("Live update")
+            fig.canvas.draw()
+            plt.show(block=False)
+        else:
+            im.set_data(mymat)
+
+
         for idx,num in enumerate(reg[1]):
             for idx2 in range(num): # each shape added multiple times
                 fit = fit and  add_shape(mymat,shapes[idx])
+
+                im.set_data(mymat)
+                im.set_clim(vmin=np.min(mymat), vmax=np.max(mymat))
+                fig.canvas.draw_idle()
+                plt.pause(0.01)
+
         if fit:
             fcnt +=1
     print(fcnt, len(regions))
@@ -136,6 +158,8 @@ def add_shape(mymat,shp):
         if mf:
             tshp = np.flipud(tshp)
         mymat[mi:mi+tshp.shape[0],mk:mk+tshp.shape[1]] += tshp
+#        plt.imshow(mymat)
+#        plt.show()
         return True
     else:
         print("no dice")
