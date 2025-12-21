@@ -2,7 +2,7 @@ import sys
 from scipy.signal import convolve2d
 import numpy as np
 from itertools import combinations
-sys.path.append("../")
+sys.path.append("../../pylib")
 import aoclib
 import copy
 import pprint
@@ -39,12 +39,14 @@ G=nx.DiGraph()
     
 
 def doit():
+    fcnt=0
     fp = open(sys.argv[1])
     ncnt = {}
     state = None
     shapes = []
     regions = []
     for line in fp.readlines():
+        print("state", state)
         if state == 'shape':
             if len(line) > 1:
                 shape.append([0 if v=='.' else 1 for v in line[:-1]])     
@@ -53,25 +55,27 @@ def doit():
                 state = None            
                 shapes.append(np.array(shape))
         numbers = re.findall(r'^(\d+):', line)
-        print(numbers)
+        print(line)
+        print("numbers",numbers)
         if(len(numbers)>0):
             shape = []
             state='shape'
-        dim = re.findall(r'^(\d+)x(\d):(( \d+)+)', line)
+        dim = re.findall(r'^(\d+)x(\d+):(( \d+)+)', line)
         if(len(dim) > 0):
             print(dim[0])
             dd = dim[0]
-            regions.append((np.zeros((int(dd[0]),int(dd[1]))),[int(d) for d in dd[2].split()]))        
+            regions.append((np.zeros((int(dd[0])+1,int(dd[1])+1)),[int(d) for d in dd[2].split()]))        
 
     for reg in regions:
         print(reg)
+        fit = True
         mymat = reg[0]
         for idx,num in enumerate(reg[1]):
             for idx2 in range(num): # each shape added multiple times
-                for ridx in range(4):
-                    add_shape(mymat,np.rot90(shapes[idx],ridx))
-
-
+                fit = fit and  add_shape(mymat,shapes[idx])
+        if fit:
+            fcnt +=1
+    print(fcnt, len(regions))
 
 
 def cur_extent(mymat):
@@ -79,15 +83,20 @@ def cur_extent(mymat):
     >>> vals = cur_extent(np.array(((0,1),(0,0),(1,1))))
     >>> assert vals == (0,2,0,1)
     """    
+    cnt = 0
     idxs = np.nonzero(np.sum(mymat,1))[0]
-    #print(idxs)
+    cnt += sum(idxs)
     minx = idxs[0]
     maxx = idxs[-1]
     idxs = np.nonzero(np.sum(mymat,0))[0]
+    cnt += sum(idxs)
     miny = idxs[0]
     maxy = idxs[-1]
 #    print(minx,maxx,miny,maxy)
-    return(minx,maxx,miny,maxy)
+    return(cnt,maxx*maxy,(maxx-minx)*(maxy-miny),minx,maxx,miny,maxy)
+
+def calc_metric(mymat):
+    pass
 
 def add_shape(mymat,shp):
     ''' greedy add of shp to the array '''    
@@ -95,14 +104,42 @@ def add_shape(mymat,shp):
     N = mymat.shape[0]
     M = mymat.shape[1]
 
-    print(N,M)
-    for ii in range(N-shp.shape[0]):
-        for kk in range(M-shp.shape[1]):
-            tmat = copy.deepcopy(mymat)
-            tmat[ii:ii+shp.shape[0],kk:kk+shp.shape[1]] += shp
-            plt.imshow(tmat)
-            plt.show()
-
+    #print(N,M) 
+    mf=mi=mk=mr = 0
+#    tmat = mymat
+    mincur = 9999
+    for flip in (0,1): 
+        for ridx in range(4):
+            tshp = np.rot90(shp,ridx)
+            if flip:
+                tshp = np.flipud(tshp)
+            for ii in range(N-tshp.shape[0]):
+                for kk in range(M-tshp.shape[1]):
+                    tmat = copy.deepcopy(mymat)
+                    tmat[ii:ii+tshp.shape[0],kk:kk+tshp.shape[1]] += tshp
+                    if np.max(tmat) > 1:
+#                        tmat[ii:ii+tshp.shape[0],kk:kk+tshp.shape[1]] -= tshp
+                        continue
+#                    tmat[ii:ii+tshp.shape[0],kk:kk+tshp.shape[1]] -= tshp
+                    cur = cur_extent(tmat)[0]
+                    if cur < mincur:
+                        mincur = cur
+                        mi=ii
+                        mk=kk
+                        mr=ridx
+                        mf=flip
+#                        plt.imshow(tmat)
+#                        plt.show()
+                    #print(cur)
+    if mincur != 9999:
+        tshp = np.rot90(shp,mr)
+        if mf:
+            tshp = np.flipud(tshp)
+        mymat[mi:mi+tshp.shape[0],mk:mk+tshp.shape[1]] += tshp
+        return True
+    else:
+        print("no dice")
+        return False
     
 if False:
     print(shapes)
@@ -112,6 +149,6 @@ if False:
     
 
 if __name__ == '__main__':
-    doctest.testmod()
+#    doctest.testmod()
     doit()
 
