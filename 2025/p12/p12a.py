@@ -38,6 +38,12 @@ G=nx.DiGraph()
 #    G.add_node(ii)
     
 
+def create_aux_shapes(shapes):
+    '''Create a set of auxiliary shapes that are square combincations    
+   
+    '''        
+        
+
 def doit():
     fcnt=0
     fp = open(sys.argv[1])
@@ -72,8 +78,10 @@ def doit():
             dd = dim[0]
             regions.append((np.zeros((int(dd[0])+1,int(dd[1])+1)),[int(d) for d in dd[2].split()]))        
 
+    ashapes = create_aux_shapes(shapes)
+
     for reg in regions:
-        print(reg)
+        #print(reg)
         fit = True
         mymat = reg[0]
 
@@ -85,6 +93,24 @@ def doit():
         else:
             im.set_data(mymat)
 
+        shape_area = 0
+        shape_max_area = 0
+        for idx,num in enumerate(reg[1]):
+            for idx2 in range(num): # each shape added multiple times
+                shape_area += np.sum(shapes[idx])
+                shape_max_area += (cur_extent(shapes[idx])[1])
+        reg_area = mymat.shape[0] * mymat.shape[1]
+        print("possible?",shape_area,shape_max_area,reg_area)
+        if shape_area > reg_area:
+            print("nope")
+            continue
+        elif shape_max_area < reg_area:
+            print("yep")
+            fcnt += 1
+            continue
+        else:
+            print("not sure")
+            continue
 
         for idx,num in enumerate(reg[1]):
             for idx2 in range(num): # each shape added multiple times
@@ -114,8 +140,7 @@ def cur_extent(mymat):
     cnt += sum(idxs)
     miny = idxs[0]
     maxy = idxs[-1]
-#    print(minx,maxx,miny,maxy)
-    return(cnt,maxx*maxy,(maxx-minx)*(maxy-miny),minx,maxx,miny,maxy)
+    return(cnt,(maxx+1)*(maxy+1),(maxx-minx)*(maxy-miny),minx,maxx,miny,maxy)
 
 def calc_metric(mymat):
     pass
