@@ -2,7 +2,7 @@ import sys
 from scipy.signal import convolve2d
 import numpy as np
 from itertools import combinations
-sys.path.append("../")
+sys.path.append("../../pylib")
 import aoclib
 import copy
 
