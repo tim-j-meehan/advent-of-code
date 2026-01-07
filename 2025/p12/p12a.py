@@ -13,22 +13,10 @@ import re
 import doctest
 cnt = 0
 
-def invalid(foo):
-    N = len(foo)
-    if foo[0:N//2] == foo[N//2:N]:
-        return int(foo)
-    return(0)
-
-
-
-first = True 
-vals = []
 cnt = 0
 doit = False
-myvals = []
 lastline = None
 cnt2=0
-myvals = []
 
 circ = []
 mincnts = []
@@ -101,16 +89,19 @@ def doit():
                 shape_max_area += (cur_extent(shapes[idx])[1])
         reg_area = mymat.shape[0] * mymat.shape[1]
         print("possible?",shape_area,shape_max_area,reg_area)
-        if shape_area > reg_area:
-            print("nope")
-            continue
-        elif shape_max_area < reg_area:
-            print("yep")
-            fcnt += 1
-            continue
-        else:
-            print("not sure")
-            continue
+        # Below is just a simple min /max bound that ended up getting me
+        # the correct answer
+        if True:        
+            if shape_area > reg_area:
+                print("nope")
+                continue
+            elif shape_max_area < reg_area:
+                print("yep")
+                fcnt += 1
+                continue
+            else:
+                print("not sure")
+                continue
 
         for idx,num in enumerate(reg[1]):
             for idx2 in range(num): # each shape added multiple times
@@ -190,6 +181,7 @@ def add_shape(mymat,shp):
         print("no dice")
         return False
     
+# turn on for visualization
 if False:
     print(shapes)
     for shp in shapes:
