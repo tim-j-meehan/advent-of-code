@@ -1,7 +1,7 @@
 import sys
 import numpy as np
 from itertools import combinations
-sys.path.append("../")
+sys.path.append("../../pylib")
 import aoclib
 
 fp = open(sys.argv[1])
@@ -13,7 +13,6 @@ for line in fp.readlines():
     thiscnt = 0
     for kk in range(12): 
         jj = 12-(kk)
-#        print(jj)
         print(vals)
         print(vals[oldmax+1:len(vals)-(jj-1)])
         maxv = max(vals[oldmax+1:len(vals)-(jj-1)])

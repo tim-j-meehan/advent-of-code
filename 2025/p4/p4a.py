@@ -2,18 +2,12 @@ import sys
 from scipy.signal import convolve2d
 import numpy as np
 from itertools import combinations
-sys.path.append("../")
+sys.path.append("../../pylib")
 import aoclib
 
 cnt = 0
 
-def invalid(foo):
-    N = len(foo)
-    if foo[0:N//2] == foo[N//2:N]:
-        return int(foo)
-    return(0)
 fp = open(sys.argv[1])
-
 
 my_map = {'@':1,'.':0}
 mat  = []
@@ -21,7 +15,6 @@ mat  = []
 first = False 
 for line in fp.readlines():
     vals = [my_map[l] for l in line[0:-1]]
-#    vals = [0] + vals + [0]
     if first:
         mat.append([0]*len(vals))
         first = False
