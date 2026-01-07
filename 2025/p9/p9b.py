@@ -8,12 +8,9 @@ import copy
 import pprint
 import networkx as nx
 import matplotlib.pyplot as plt
-cnt = 0
 
 
 def check_crossings(aa,bb,mymat):
-#    print("aa",aa)
-#    print("bb",bb)
     ll = (min(aa[0],bb[0]),min(aa[1],bb[1]))
     ur = (max(aa[0],bb[0]),max(aa[1],bb[1]))
     cross = False
@@ -54,33 +51,15 @@ def check_crossings(aa,bb,mymat):
     return cross
         
                                        
-def invalid(foo):
-    N = len(foo)
-    if foo[0:N//2] == foo[N//2:N]:
-        return int(foo)
-    return(0)
 fp = open(sys.argv[1])
 
-
-
-first = True 
 vals = []
-cnt = 0
-doit = False
-myvals = []
-lastline = None
-cnt2=0
 myvals = []
 
-circ = []
 for line in fp.readlines():
 #    print(line,len(line))
     vals = [int(x) for x in line.split(',')]
     myvals.append(vals)
-#    if vals[0] >= 50278:
-#        myvals.append(vals)
-#    if vals[0] <= 48472:
-#        myvals.append(vals)
 myvals.append(myvals[0])
 mymat = np.array(myvals)
 pprint.pprint(mymat)
@@ -96,10 +75,6 @@ for ii in range(N):
         dif = mymat[ii] - mymat[kk]
         area = abs(dif[0]) * abs(dif[1])
         lookup[area] = (ii,kk) 
-#        if dist < mindist:
-#            mindist = dist
-#            minii= ii
-#            minkk=kk
 
 skeys = sorted(lookup.keys())
 
@@ -107,12 +82,7 @@ for ii in range(1,len(skeys)):
 
     a,b = lookup[skeys[-ii]]
     
-#    myvals= ((0,0),(0,3),(2,3),(2,5),(0,5),     (0,8),(8,8),(8,0),(0,0))
-#    mymat = np.array(myvals)
-#    a = 0
-#    b = 6
     val = check_crossings(myvals[a],myvals[b],myvals)
-#    val = False
     print(ii,val)
     print(len(myvals))
     if not val:
