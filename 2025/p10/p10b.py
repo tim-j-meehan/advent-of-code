@@ -2,7 +2,7 @@ import sys
 from scipy.signal import convolve2d
 import numpy as np
 from itertools import combinations
-sys.path.append("../")
+sys.path.append("../../pylib")
 import aoclib
 import copy
 import pprint
@@ -26,11 +26,6 @@ cnt = 0
 
 # this problem is equiv to min ||x||_1 subject to Ax=b
 
-def invalid(foo):
-    N = len(foo)
-    if foo[0:N//2] == foo[N//2:N]:
-        return int(foo)
-    return(0)
 fp = open(sys.argv[1])
 
 
@@ -38,9 +33,7 @@ fp = open(sys.argv[1])
 def solve_min_l1_integer(A, b):
     m, n = A.shape
     
-    # 1. Define objective coefficients (c)
-    # We are minimizing 1^T * y. The decision variables are x (n vars) and y (m vars).
-    # Coefficients for x are zero, coefficients for y are all ones.
+    #objective
     c = np.concatenate([np.zeros(n), np.ones(m)])
     
     # 2. Define inequality constraints (A_ub, b_ub in linprog terms, but milp uses LinearConstraint)
@@ -81,32 +74,11 @@ def solve_min_l1_integer(A, b):
     if result.success:
         # The first n elements of result.x are the integer solutions for x
         x_solution = result.x[:n]
-        # You may want to round them to ensure they are clean integers due to potential floating point tolerances
         x_solution = np.round(x_solution).astype(int) 
         return x_solution, result.fun
     else:
         print(f"Optimization failed: {result.message}")
         return None, None
-
-## Example Usage:
-#A = np.array([[1, 2], [3, 4]])
-#b = np.array([5, 6])
-#x_int, l1_norm = solve_min_l1_integer(A, b)
-#
-#if x_int is not None:
-#    print(f"Optimal integer solution x: {x_int}")
-#    print(f"Minimum L1 norm of residual |Ax - b|: {l1_norm}")
-#    print(f"Calculated residual: {np.abs(A @ x_int - b)}")
-
-
-
-
-
-
-
-
-
-
 
 
 def solve_min_l1_constrained(A, b):
@@ -121,21 +93,12 @@ def solve_min_l1_constrained(A, b):
     np.ndarray: The optimal vector x.
     """
     m, n = A.shape
-    # The new variables are concatenated as z = [z+, z-] of length 2*n
 
-    # Objective function coefficients c: minimize sum(z+) + sum(z-)
-    #c = np.ones(2 * n)
+    #objective
     c = np.ones( n)
 
-    # Equality constraints A_eq * z = b_eq: A(z+ - z-) = b
-    # A_eq matrix is constructed by concatenating A and -A horizontally
-    A_eq = np.hstack([A, -A])
-    b_eq = b
-
     # Bounds for variables: z+ >= 0 and z- >= 0
-    # The bounds argument in linprog sets lower and upper bounds for each variable.
-    # We use (0, None) for non-negativity and no upper bound.
-    bounds = (0, None) # Applies (0, None) to all 2*n variables
+    bounds = (0, None) 
 
     # Solve the linear programming problem
     #result = linprog(c, A_eq=A_eq, b_eq=b_eq, bounds=bounds, method='highs',integrality=1) 
@@ -151,51 +114,18 @@ def solve_min_l1_constrained(A, b):
     else:
         raise RuntimeError(f"Optimization failed: {result.message}")
 
-# Example Usage:
-# Define a matrix A and vector b (e.g., an underdetermined system for Basis Pursuit)
 
-#try:
-#    x_optimal, l1_norm = solve_min_l1_constrained(A, b)
-#    print("Optimal x:", np.round(x_optimal, 4))
-#    print("Minimum L1 norm:", round(l1_norm, 4))
-#    print("Check Ax = b:", np.round(A @ x_optimal, 4))
-#except RuntimeError as e:
-#    print(e)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-first = True 
 vals = []
 cnt = 0
-doit = False
-myvals = []
-lastline = None
 cnt2=0
-myvals = []
 cnt3=0
 
-circ = []
-mincnts = []
 for line in fp.readlines():
     #print(line,len(line))
     vals = line.split()
     lights = vals[0][1:-1]
-    #light = sum([1<<k if v == '#' else 0 for k,v in enumerate(lights[::-1])]) 
     light = sum([1<<k if v == '#' else 0 for k,v in enumerate(lights)]) 
     joltage = np.array([int(v) for v in vals[-1][1:-1].split(',')])
-#    buttons = [sum([1<<int(x) for x in v[1:-1].split(',')]) for v in vals[1:-1]]
     N = len(joltage)
     buttons = []
     for v in vals[1:-1]:
@@ -207,17 +137,12 @@ for line in fp.readlines():
     A = np.transpose(mymat)
     #print(A.shape)
     b = joltage
-#    x = np.array([1,3,0,3,1,2])
-#    print(x.shape)
-#    print("mult",A @ x.transpose())
     x_opt, l1_norm = solve_min_l1_constrained(A, b)
     x_int, l1i_norm = solve_min_l1_integer(A, b)
     res = np.sum(A @ x_opt- b)
     print("ZZZZZZZZZZ",res)
     if np.abs(res) > 1e-18:
         pass
-    #print("XXX", A)
-    #print("XXX", b)
     print("XXX  xopt ",x_opt,l1_norm)
     #print("XXXL1",x_int,l1i_norm)
     cnt+= sum(x_int)
