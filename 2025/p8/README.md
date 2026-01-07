@@ -1,1 +1,1 @@
-This is a natural graph problem and I resorted to NetworkX
+This is a natural graph problem and I resorted to NetworkX.
