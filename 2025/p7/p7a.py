@@ -2,25 +2,16 @@ import sys
 from scipy.signal import convolve2d
 import numpy as np
 from itertools import combinations
-sys.path.append("../")
+sys.path.append("../../pylib")
 import aoclib
 import copy
 
 cnt = 0
 
-def invalid(foo):
-    N = len(foo)
-    if foo[0:N//2] == foo[N//2:N]:
-        return int(foo)
-    return(0)
 fp = open(sys.argv[1])
 
-
-first = True 
 vals = []
 cnt = 0
-doit = False
-myvals = []
 lastline = None
 cnt2=0
 for line in fp.readlines():
@@ -48,4 +39,3 @@ for line in fp.readlines():
                 pass
     lastline = copy.deepcopy(vals)
 print(cnt,cnt2)
-        

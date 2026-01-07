@@ -1,4 +1,3 @@
-
 For the first problem I simply looped down the input
 keeping track of the splits.
 
