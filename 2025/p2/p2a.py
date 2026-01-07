@@ -1,7 +1,7 @@
 import sys
 import numpy as np
 from itertools import combinations
-sys.path.append("../")
+sys.path.append("../../pylib")
 import aoclib
 
 def invalid(foo):

@@ -1,3 +1,6 @@
+
+This was not hard, but did seem hard for a day 2 problem
+
 For part 1 my approach was to just brute force a search.  loop
 over all values in a range and see which ones contained repeated
 values
